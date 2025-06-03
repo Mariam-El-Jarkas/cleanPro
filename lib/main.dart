@@ -6,7 +6,7 @@ import 'pages/login.dart';
 import 'pages/signup.dart';
 import 'pages/account.dart';
 import 'pages/help.dart';
-import 'pages/home.dart';
+import 'pages/home.dart'; // Make sure MainScreen is here
 import 'pages/onboard1.dart';
 
 const bool useFirebase = false;
@@ -41,9 +41,17 @@ class CleanProApp extends StatelessWidget {
       routes: {
         '/': (_) => const OnBoardScreen1(),
         '/home': (_) => const MainScreen(),
-        '/account': (_) => AccountScreen(initialEmail: ''),
+        '/account': (_) => AccountScreen(
+          initialEmail: '',
+        ), // You may want to handle email dynamically
         '/help': (_) => const HelpScreen(),
-        '/login': (_) => const LoginScreen(),
+        '/login': (_) => LoginScreen(
+          onLoginSuccess: (email) {
+            // Handle login success globally if needed
+            // Or navigate to home after login:
+            // Navigator.of(context).pushReplacementNamed('/home');
+          },
+        ),
         '/signup': (_) => const SignupScreen(),
       },
     );

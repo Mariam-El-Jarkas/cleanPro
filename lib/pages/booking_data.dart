@@ -9,7 +9,7 @@ class Booking {
   final String address;
   final DateTime date;
   final TimeOfDay time;
-  String status; // Status: 'pending' or 'completed'
+  String status; // 'pending', 'completed', or 'canceled'
 
   Booking({
     required this.serviceName,
@@ -22,40 +22,48 @@ class Booking {
     this.status = 'pending',
   });
 
-  // Helper property to quickly check if booking is completed
+  // Helper to check if booking is completed
   bool get isCompleted => status == 'completed';
+
+  // Helper to check if booking is canceled
+  bool get isCanceled => status == 'canceled';
 }
 
 // Singleton class to manage bookings throughout the app
 class BookingHistoryData {
-  // Private constructor
   BookingHistoryData._privateConstructor();
 
-  // Singleton instance
   static final BookingHistoryData instance =
       BookingHistoryData._privateConstructor();
 
-  // Internal list of all bookings
   final List<Booking> _bookings = [];
 
-  // Getter to return upcoming (pending) bookings only
+  // Bookings that are still pending
   List<Booking> get upcomingBookings =>
-      _bookings.where((booking) => !booking.isCompleted).toList();
+      _bookings.where((b) => b.status == 'pending').toList();
 
-  // Getter to return past (completed) bookings only
+  // Bookings that are either completed or canceled
   List<Booking> get pastBookings =>
-      _bookings.where((booking) => booking.isCompleted).toList();
+      _bookings.where((b) => b.status != 'pending').toList();
 
-  // Method to add a new booking
+  // Add a new booking
   void addBooking(Booking booking) {
     _bookings.add(booking);
   }
 
-  // Method to mark a booking as completed
+  // Mark a booking as completed
   void markCompleted(Booking booking) {
     final index = _bookings.indexOf(booking);
     if (index != -1) {
       _bookings[index].status = 'completed';
+    }
+  }
+
+  // Cancel a booking
+  void cancelBooking(Booking booking) {
+    final index = _bookings.indexOf(booking);
+    if (index != -1) {
+      _bookings[index].status = 'canceled';
     }
   }
 }

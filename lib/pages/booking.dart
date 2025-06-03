@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'history.dart'; // Your history page
-import 'booking_data.dart'; // Import the Booking class and BookingHistoryData
+import 'booking_data.dart';
+import 'home.dart';
 
 class BookingScreen extends StatefulWidget {
   final String serviceName;
@@ -18,7 +18,6 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -34,73 +33,62 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _pickDate() async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: const Color.fromARGB(255, 217, 124, 18),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: const Color.fromARGB(255, 217, 124, 18),
+            onPrimary: Colors.black,
+            onSurface: Colors.black,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 217, 124, 18),
             ),
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _pickTime() async {
-    final TimeOfDay? picked = await showTimePicker(
+    final picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime ?? TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: const Color.fromARGB(255, 217, 124, 18),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: const Color.fromARGB(255, 217, 124, 18),
+            onPrimary: Colors.black,
+            onSurface: Colors.black,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 217, 124, 18),
             ),
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
+    if (picked != null) setState(() => _selectedTime = picked);
   }
 
   void _submitBooking() {
     if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null) {
+      if (_selectedDate == null || _selectedTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a preferred date')),
-        );
-        return;
-      }
-      if (_selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a preferred time')),
+          const SnackBar(content: Text('Please select date and time')),
         );
         return;
       }
 
-      // Use Booking from booking_data.dart
       final newBooking = Booking(
         serviceName: widget.serviceName,
         price: widget.price,
@@ -117,129 +105,185 @@ class _BookingScreenState extends State<BookingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Booking Confirmed for ${widget.serviceName} on ${_selectedDate!.toLocal().toString().split(' ')[0]} at ${_selectedTime!.format(context)}!',
+            'Booking confirmed for ${widget.serviceName} on ${_selectedDate!.toLocal().toString().split(' ')[0]} at ${_selectedTime!.format(context)}',
           ),
           backgroundColor: const Color.fromARGB(255, 217, 124, 18),
         ),
       );
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HistoryScreen()),
+        MaterialPageRoute(builder: (_) => MainScreen(initialIndex: 2)),
+        (route) => false,
       );
     }
   }
 
+  InputDecoration _inputDecoration(IconData icon, String label) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: const Color.fromARGB(255, 217, 124, 18)),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 217, 124, 18),
+          width: 2,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Book: ${widget.serviceName}'),
-        backgroundColor: const Color.fromARGB(255, 217, 124, 18),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelStyle: MaterialStateTextStyle.resolveWith((states) {
+            if (states.contains(MaterialState.hovered)) {
+              return const TextStyle(
+                color: Color.fromARGB(255, 217, 124, 18), // Orange on hover
+              );
+            }
+            if (states.contains(MaterialState.focused)) {
+              return const TextStyle(
+                color: Color.fromARGB(255, 217, 124, 18), // Orange on focus
+              );
+            }
+            return const TextStyle(
+              color: Colors.black, // Default label color
+            );
+          }),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Price: \$${widget.price.toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(255, 217, 124, 18),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Book: ${widget.serviceName}'),
+          backgroundColor: const Color.fromARGB(255, 217, 124, 18),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Text(
+                  'Price: \$${widget.price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 217, 124, 18),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: _inputDecoration(Icons.person, 'Full Name'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Enter your name' : null,
                 ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter your name' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: _inputDecoration(Icons.phone, 'Phone Number'),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Enter phone' : null,
                 ),
-                keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter your phone' : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.home),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: _inputDecoration(Icons.home, 'Address'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Enter address' : null,
                 ),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter your address'
-                    : null,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _selectedDate == null
-                    ? 'Select preferred date'
-                    : 'Preferred date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: _pickDate,
-                icon: const Icon(Icons.calendar_today),
-                label: const Text('Choose Date'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 217, 124, 18),
-                  foregroundColor: Colors.black,
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 12,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          color: Color.fromARGB(255, 217, 124, 18),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          _selectedDate == null
+                              ? 'Choose Date'
+                              : 'Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _selectedTime == null
-                    ? 'Select preferred time'
-                    : 'Preferred time: ${_selectedTime!.format(context)}',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: _pickTime,
-                icon: const Icon(Icons.access_time),
-                label: const Text('Choose Time'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 217, 124, 18),
-                  foregroundColor: Colors.black,
+                GestureDetector(
+                  onTap: _pickTime,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 12,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          color: Color.fromARGB(255, 217, 124, 18),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          _selectedTime == null
+                              ? 'Choose Time'
+                              : 'Time: ${_selectedTime!.format(context)}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
+                ElevatedButton(
                   onPressed: _submitBooking,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 217, 124, 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   child: const Text(
                     'Confirm Booking',
-                    style: TextStyle(fontSize: 18, color: Colors.black),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

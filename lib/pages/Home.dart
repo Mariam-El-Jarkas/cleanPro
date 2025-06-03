@@ -2,48 +2,58 @@ import 'package:flutter/material.dart';
 import 'account.dart';
 import 'help.dart';
 import 'services_details.dart';
+import 'history.dart';
 import 'login.dart';
-import 'history.dart'; // Import history.dart here
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   String? _loggedInEmail;
 
-  final List<Widget> _widgetOptions = [];
+  late List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
-    _widgetOptions.addAll([
-      const HomeScreen(),
-      const ServicesScreen(),
-      Container(), // Placeholder for Account (will be replaced when logged in)
-      const HelpScreen(),
-      const HistoryScreen(), // Add History screen here
-    ]);
+    _selectedIndex = widget.initialIndex;
+    _updateWidgetOptions();
   }
 
-  void _onItemTapped(int index) async {
-    if (index == 2) {
-      // Account requires login
-      final result = await Navigator.push<String>(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+  void _updateWidgetOptions() {
+    _widgetOptions = [
+      const HomeScreen(),
+      const ServicesScreen(),
+      const HistoryScreen(),
+      const HelpScreen(),
+      _loggedInEmail == null
+          ? LoginScreen(onLoginSuccess: _handleLoginSuccess)
+          : AccountScreen(initialEmail: _loggedInEmail!),
+    ];
+  }
 
-      if (result != null && result.contains('@')) {
-        setState(() {
-          _loggedInEmail = result;
-          _selectedIndex = 2;
-        });
-      }
+  void _handleLoginSuccess(String email) {
+    setState(() {
+      _loggedInEmail = email;
+      _selectedIndex = 4; // Switch to Profile tab
+      _updateWidgetOptions();
+    });
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 4 && _loggedInEmail == null) {
+      // If not logged in, show login screen in Profile tab
+      setState(() {
+        _selectedIndex = 4;
+        _updateWidgetOptions();
+      });
     } else {
       setState(() {
         _selectedIndex = index;
@@ -54,9 +64,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedIndex == 2
-          ? AccountScreen(initialEmail: _loggedInEmail ?? '')
-          : _widgetOptions[_selectedIndex],
+      body: _widgetOptions[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: const Color.fromARGB(255, 217, 124, 18),
         currentIndex: _selectedIndex,
@@ -68,17 +76,16 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.cleaning_services),
             label: 'Services',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(icon: Icon(Icons.help), label: 'Help'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ), // Added History here
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 }
+
+// ... Your HomeScreen and ServicesScreen code here (unchanged) ...
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -138,9 +145,9 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // disables the back arrow
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 217, 124, 18),
-        centerTitle: true, // centers the title
+        centerTitle: true,
         title: const Text('Our Services'),
       ),
       body: ListView.builder(
