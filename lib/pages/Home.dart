@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'account.dart';
 import 'help.dart';
 import 'services_details.dart';
+import 'login.dart';
+import 'history.dart'; // Import history.dart here
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,26 +14,51 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  String? _loggedInEmail;
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    const HomeScreen(),
-    const ServicesScreen(),
-    const AccountScreen(),
-    const HelpScreen(),
-  ];
+  final List<Widget> _widgetOptions = [];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions.addAll([
+      const HomeScreen(),
+      const ServicesScreen(),
+      Container(), // Placeholder for Account (will be replaced when logged in)
+      const HelpScreen(),
+      const HistoryScreen(), // Add History screen here
+    ]);
+  }
+
+  void _onItemTapped(int index) async {
+    if (index == 2) {
+      // Account requires login
+      final result = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+
+      if (result != null && result.contains('@')) {
+        setState(() {
+          _loggedInEmail = result;
+          _selectedIndex = 2;
+        });
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions[_selectedIndex],
+      body: _selectedIndex == 2
+          ? AccountScreen(initialEmail: _loggedInEmail ?? '')
+          : _widgetOptions[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: const Color(0xFF6C63FF),
+        selectedItemColor: const Color.fromARGB(255, 217, 124, 18),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
@@ -43,6 +70,10 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
           BottomNavigationBarItem(icon: Icon(Icons.help), label: 'Help'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+          ), // Added History here
         ],
       ),
     );
@@ -63,7 +94,7 @@ class HomeScreen extends StatelessWidget {
             const Icon(
               Icons.cleaning_services_rounded,
               size: 100,
-              color: Color(0xFF6C63FF),
+              color: Color.fromARGB(255, 217, 124, 18),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -71,7 +102,7 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF6C63FF),
+                color: Color.fromARGB(255, 217, 124, 18),
               ),
             ),
             const SizedBox(height: 10),
@@ -107,8 +138,10 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // disables the back arrow
+        backgroundColor: const Color.fromARGB(255, 217, 124, 18),
+        centerTitle: true, // centers the title
         title: const Text('Our Services'),
-        backgroundColor: const Color(0xFF6C63FF),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -123,8 +156,16 @@ class ServicesScreen extends StatelessWidget {
             elevation: 3,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
-                child: Icon(service['icon'], color: const Color(0xFF6C63FF)),
+                backgroundColor: const Color.fromARGB(
+                  255,
+                  217,
+                  124,
+                  18,
+                ).withOpacity(0.1),
+                child: Icon(
+                  service['icon'],
+                  color: const Color.fromARGB(255, 217, 124, 18),
+                ),
               ),
               title: Text(
                 service['name'],
@@ -141,12 +182,15 @@ class ServicesScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
+                  backgroundColor: const Color.fromARGB(255, 217, 124, 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: const Text('Book Now'),
+                child: const Text(
+                  'Book Now',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           );

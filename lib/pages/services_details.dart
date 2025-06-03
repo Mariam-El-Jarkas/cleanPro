@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'booking.dart'; // Make sure you have this file with BookingScreen defined
 
 class ServiceDetailScreen extends StatelessWidget {
   final String serviceName;
   final String description;
   final List<String> features;
+  final double price;
 
   ServiceDetailScreen({super.key, required this.serviceName})
     : description = _getDescription(serviceName),
-      features = _getFeatures(serviceName);
+      features = _getFeatures(serviceName),
+      price = _getPrice(serviceName);
 
   static String _getDescription(String name) {
     switch (name) {
@@ -123,27 +126,96 @@ class ServiceDetailScreen extends StatelessWidget {
     }
   }
 
+  static double _getPrice(String name) {
+    switch (name) {
+      case 'Deep Cleaning':
+        return 120.0;
+      case 'Carpet & Furniture Cleaning':
+        return 90.0;
+      case 'Window Cleaning':
+        return 75.0;
+      case 'Solar Panels Cleaning':
+        return 80.0;
+      case 'House Keeping':
+        return 100.0;
+      case 'Sterilization':
+        return 150.0;
+      case 'Pest Control':
+        return 130.0;
+      case 'Stewarding':
+        return 110.0;
+      case 'Professional Training':
+        return 200.0;
+      case 'Products, Tools & Equipment':
+        return 50.0;
+      default:
+        return 0.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(serviceName),
-        backgroundColor: Color(0xFF6C63FF),
+        backgroundColor: const Color.fromARGB(255, 217, 124, 18),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            Text(description, style: TextStyle(fontSize: 16, height: 1.5)),
-            SizedBox(height: 20),
             Text(
+              description,
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Price: \$${price.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 217, 124, 18),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
               'Features:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             ...features.map(
               (feature) => ListTile(
-                leading: Icon(Icons.check, color: Color(0xFF6C63FF)),
+                leading: const Icon(
+                  Icons.check,
+                  color: Color.fromARGB(255, 217, 124, 18),
+                ),
                 title: Text(feature),
+              ),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to booking screen, passing service name and price if needed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          BookingScreen(serviceName: serviceName, price: price),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 217, 124, 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Order Now',
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                ),
               ),
             ),
           ],

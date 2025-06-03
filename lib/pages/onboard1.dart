@@ -10,24 +10,17 @@ class OnBoardScreen1 extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
                 flex: 5,
-                child: SizedBox(
-                  child: Image.asset(
-                    '/images/image.png', // no leading slash
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                child: Image.asset('images/image.png', fit: BoxFit.contain),
               ),
-
               Expanded(
                 flex: 3,
                 child: Column(
                   children: [
-                    Text(
-                      'Welcome to cleanPro',
+                    const Text(
+                      'Welcome to CleanPro',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -35,35 +28,36 @@ class OnBoardScreen1 extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 34),
-                    Text(
+                    const SizedBox(height: 24),
+                    const Text(
                       'Your trusted partner for professional cleaning services.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Spacer(), // keeps the Next button at the bottom
+                    const Spacer(),
                     ElevatedButton(
-                      onPressed: () => Navigator.pushNamed(context, '/Home'),
+                      onPressed: () => Navigator.pushNamed(context, '/home'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 217, 124, 18),
-                        minimumSize: Size(double.infinity, 50),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          217,
+                          124,
+                          18,
+                        ),
+                        minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Next',
-                        style: TextStyle(
-                          fontSize: 21,
-                          color: Colors.black, // ← make the text black
-                        ),
+                        style: TextStyle(fontSize: 21, color: Colors.black),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),

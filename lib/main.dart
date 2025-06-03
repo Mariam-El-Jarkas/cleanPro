@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'pages/onboard1.dart';
-import 'pages/Home.dart';
+// Uncomment below only if you're using Firebase
+// import 'package:firebase_core/firebase_core.dart';
+
+import 'pages/login.dart';
+import 'pages/signup.dart';
 import 'pages/account.dart';
 import 'pages/help.dart';
-// import 'pages/services_details.dart';
+import 'pages/home.dart';
+import 'pages/onboard1.dart';
 
-void main() {
-  runApp(CleanProApp());
+const bool useFirebase = false;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (useFirebase) {
+    // await Firebase.initializeApp(); // Initialize Firebase if needed
+  }
+
+  runApp(const CleanProApp());
 }
 
 class CleanProApp extends StatelessWidget {
@@ -18,16 +30,21 @@ class CleanProApp extends StatelessWidget {
       title: 'CleanPro',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFF6C63FF),
+        primaryColor: const Color(0xFF6C63FF),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: const Color(0xFF6C63FF),
+        ),
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => OnBoardScreen1(),
-        '/Home': (context) => MainScreen(),
-        '/account': (context) => AccountScreen(),
-        '/help': (context) => HelpScreen(),
+        '/': (_) => const OnBoardScreen1(),
+        '/home': (_) => const MainScreen(),
+        '/account': (_) => AccountScreen(initialEmail: ''),
+        '/help': (_) => const HelpScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/signup': (_) => const SignupScreen(),
       },
     );
   }
